@@ -73,7 +73,8 @@ jobs:
       - image: cimg/base:2022.06
     steps:
       - checkout
-      - restore_cache: keys:[frontend-build]
+      - restore_cache:
+          keys: [frontend-build]
       - run: |
           cd frontend
           npm install
@@ -84,7 +85,8 @@ jobs:
       - image: cimg/base:2022.06
     steps:
       - checkout
-      - restore_cache: keys:[backend-build]
+      - restore_cache:
+          keys: [backend-build]
       - run: |
           cd backend
           npm install
