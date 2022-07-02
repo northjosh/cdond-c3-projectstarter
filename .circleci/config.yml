@@ -211,9 +211,9 @@ jobs:
 
   smoke-test:
     docker:
-      - image: cimg/base:
+      - image: cimg/base:2022.06
     steps:
-      # Checkout code from git
+      - checkout
       - run:
           name: Install dependencies
           command: |
@@ -236,7 +236,7 @@ jobs:
     docker:
       - image : amazon/aws-cli
     steps:
-      # Checkout code from git
+     - checkout
       - run:
           name: Install dependencies
           command: |
@@ -251,7 +251,7 @@ cleanup:
   docker:
     - image: cimg/base:2022.06
   steps:
-    # Checkout code from git
+    - checkout
     - run:
         name: Get old stack workflow id
         command: |
