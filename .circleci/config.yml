@@ -41,7 +41,7 @@ jobs:
       - restore_cache:
           keys: [frontend-build]
       - run:
-          name: Build front-end
+          name: Build Frontend
           command: |
             cd frontend
             npm install
@@ -58,7 +58,7 @@ jobs:
       - restore_cache:
           keys: [backend-build]
       - run:
-          name: Back-end build
+          name: Build Backend
           command: |
             cd backend
             npm install
@@ -74,10 +74,12 @@ jobs:
       - checkout
       - restore_cache:
           keys: [frontend-build]
-      - run: |
-          cd frontend
-          npm install
-          npm run test
+      - run:
+          name: Test Frontend
+          command: |
+            cd frontend
+            npm install
+            npm run test
 
   test-backend:
     docker:
@@ -86,10 +88,12 @@ jobs:
       - checkout
       - restore_cache:
           keys: [backend-build]
-      - run: |
-          cd backend
-          npm install
-          npm run test
+      - run:
+          name: Test Backend
+          command: |
+            cd backend
+            npm install
+            npm run test
 
   scan-frontend:
     docker:
@@ -99,11 +103,13 @@ jobs:
       - checkout
       - restore_cache:
           keys: [frontend-build]
-      - run: |
-          cd frontend
-          npm install
-          # npm install oauth-sign@^0.9.0
-          npm audit --audit-level=critical
+      - run:
+          name: Scan Frontend
+          command: |
+            cd frontend
+            npm install
+            # npm install oauth-sign@^0.9.0
+            npm audit --audit-level=critical
 
   scan-backend:
     docker:
@@ -112,11 +118,13 @@ jobs:
       - checkout
       - restore_cache:
           keys: [backend-build]
-      - run: |
-          cd frontend
-          npm install
-          # npm install oauth-sign@^0.9.0
-          npm audit --audit-level=critical
+      - run:
+          name: Scan backend
+          command: |
+            cd frontend
+            npm install
+            # npm install oauth-sign@^0.9.0
+            npm audit --audit-level=critical
 
 #   deploy-infrastructure:
 #     docker:
