@@ -1,0 +1,21 @@
+---
+- name: "update packages"
+  become: yes
+  apt:
+    update_cache: yes
+
+- name: "upgrade packages"
+  become: yes
+  apt:
+    upgrade: yes
+
+- name: "Unzip Files"
+  become: yes
+  shell: tar -xvf artifact.tar.gz
+
+- name: "Deploy"
+  become: yes
+  shell: |
+    npm install
+    pm2 stop default
+    pm2 start npm -- start
