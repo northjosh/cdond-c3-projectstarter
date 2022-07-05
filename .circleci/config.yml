@@ -178,7 +178,7 @@ jobs:
 
   configure-infrastructure:
     docker:
-      - image: amazon/awscli
+      - image: cimg/base:2022.06
     steps:
       - checkout
       - add_ssh_keys:
@@ -190,8 +190,10 @@ jobs:
       - run:
           name: Install dependencies
           command: |
+            yum install python3
             yum install tar gzip 
             yum install ansible
+            yum install aws-cli
 
       - run:
           name: Configure server
