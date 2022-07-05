@@ -190,10 +190,10 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            yum install python3
-            yum install tar gzip 
-            yum install ansible
-            yum install aws-cli
+            apt install python3
+            apt install tar gzip 
+            apt install ansible
+            apt install aws-cli
 
       - run:
           name: Configure server
