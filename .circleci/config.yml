@@ -7,14 +7,15 @@ commands:
       # Add parameter here
       workflow_id:
         type: string
+        default: ${CIRCLE_WORKFLOW_ID:0:7}
     steps:
       - run:
           name: Destroy environments
           when: on_fail
           command: |
             echo "Destroying environment: << parameters.workflow_id >> "
-            aws cloudformation delete-stack --stack-name << parameters.workflow_id >>
-            exit 1
+            aws cloudformation delete-stack --stack-name udapeople-frontend-<< parameters.workflow_id >>
+            aws cloudformation delete-stack --stack-name udapeople-backend-<< parameters.workflow_id >>
 
   revert-migrations:
     description: Revert the last migration if successfully run in the current workflow.
@@ -157,7 +158,6 @@ jobs:
               --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" \
               --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"  \
               --tags project=udapeople
-            exit 1
       - run:
           name: Add back-end ip to ansible inventory
           command: |
@@ -171,29 +171,29 @@ jobs:
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
-#   configure-infrastructure:
-#     docker:
-#       - image: python:3.7-alpine3.11
-#     steps:
-#       - checkout
-#       - add_ssh_keys:
-#           fingerprint: ["95:42:db:09:f9:c4:7f:eb:77:9f:f8:4a:86:7c:2f:35"]
-#       # attach workspace
-#       - attach_workspace:
-#           at: ./ansible
+  configure-infrastructure:
+    docker:
+      - image: python:3.7-alpine3.11
+    steps:
+      - checkout
+      - add_ssh_keys:
+          fingerprint: ["95:42:db:09:f9:c4:7f:eb:77:9f:f8:4a:86:7c:2f:35"]
+      # attach workspace
+      - attach_workspace:
+          at: ./ansible
 
-#       - run:
-#           name: Install dependencies
-#           command: |
-#             apk install tar gzip awscli
-#             exit 1
-#       - run:
-#           name: Configure server
-#           command: |
-#             asible-playbook -i inventory.txt configure-server.yml
-#             exit 1
-#       # Here's where you will add some code to rollback on failure
-#       - destroy_environment
+      - run:
+          name: Install dependencies
+          command: |
+            apk install tar gzip awscli
+            exit 1
+      - run:
+          name: Configure server
+          command: |
+            asible-playbook -i inventory.txt configure-server.yml
+            exit 1
+      # Here's where you will add some code to rollback on failure
+      - destroy-environment
 
 #   run-migrations:
 #     docker:
