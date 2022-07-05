@@ -191,7 +191,7 @@ jobs:
           name: Install dependencies
           command: |
             apk add tar gzip 
-            apk add --no-cache awscli
+            apk add --no-cache aws-cli
 
       - run:
           name: Configure server
