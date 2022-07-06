@@ -195,7 +195,7 @@ jobs:
             apk add --update ansible
             python -m pip install awscli
 
-      -run: 
+      - run:
         name: View Inventory File
         command: |
           cd ~project/.circleci/ansible
