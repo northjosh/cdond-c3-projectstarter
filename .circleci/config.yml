@@ -166,7 +166,7 @@ jobs:
             \
                --query 'Reservations[*].Instances[*].PublicIpAddress' \
               --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
-              --output text >> .circleci/ansible/inventory.txt
+              --output text >> ~project/.circleci/ansible/inventory.txt
               cat .circleci/ansible/inventory.txt
 
       - persist_to_workspace:
@@ -195,6 +195,12 @@ jobs:
             apk add --update ansible
             python -m pip install awscli
 
+      -run: 
+        name: View Inventory File
+        command: |
+          cd ~project/.circleci/ansible
+          cat inventry.txt
+
       - run:
           name: Configure server
           command: |
@@ -205,13 +211,14 @@ jobs:
 
   run-migrations:
     docker:
-      - image: amazon/aws-cli
+      - image: cimg/base:2022.06
     steps:
       - checkout
       - run:
           name: Install Dependencies
           command: |
-            yum install nodejs curl
+            sudo apt install nodejs npm
+            sudo apt install awscli
 
       - run:
           name: Run migrations
