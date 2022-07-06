@@ -29,14 +29,14 @@ commands:
           # Add when this will run
           when: on_fail
           command: |
-            # Curl command here to see if there was a successful migration associated with the workflow id, store result in SUCCESS variable
-            SUCCESS=$(curl --insecure  https://kvdb.io/8xrU98Bae8gHY6aafj3KfW/migration_<< parameters.workflow_id >>)
-            if(( $SUCCESS==1 )); 
-            then
-              cd ~/project/backend
-              npm install
-              npm run migratios:revert 
-            fi
+#            Curl command here to see if there was a successful migration associated with the workflow id, store result in SUCCESS variable
+#            SUCCESS=$(curl --insecure  https://kvdb.io/8xrU98Bae8gHY6aafj3KfW/migration_<< parameters.workflow_id >>)
+#            if(( $SUCCESS==1 )); 
+#            then
+            cd ~/project/backend
+            npm install
+            npm run migratios:revert 
+#            fi
 
 jobs:
   build-frontend:
@@ -150,6 +150,16 @@ jobs:
               --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
               --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"  \
               --tags project=udapeople
+
+      - run:
+          name: Save backend IP in kvdb
+          command: |
+            BACKEND_IP=$(aws ec2 describe-instances \
+              --query 'Reservations[*].Instances[*].PublicIpAddress' \
+              --filters "Name=tag:project,Values=udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --output text)
+            curl https://kvdb.io/8xrU98Bae8gHY6aafj3KfW/backend_ip_${CIRCLE_WORKFLOW_ID:0:7} -d ${BACKEND_IP}
+
       - run:
           name: Ensure front-end infrastructure exist
           command: |
@@ -190,7 +200,6 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            apk add --update tar gzip 
             apk add --update ansible
             python -m pip install awscli
 
@@ -204,6 +213,7 @@ jobs:
           name: Configure server
           command: |
             cd .circleci/ansible
+            timeout 120 ping 8.8.8.8
             ansible-playbook -i inventory.txt configure-server.yml
       # Here's where you will add some code to rollback on failure
       - destroy-environment
@@ -213,6 +223,10 @@ jobs:
       - image: cimg/base:2022.06
     steps:
       - checkout
+      - restore_cache:
+          keys:
+            - backend-build
+
       - run:
           name: Install Dependencies
           command: |
@@ -233,6 +247,7 @@ jobs:
             then
             curl https://kvdb.io/8xrU98Bae8gHY6aafj3KfW/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
             fi
+            echo "Results uploaded to kvdb......"
       # Here's where you will add some code to rollback on failure
       - destroy-environment
       - revert-migrations
@@ -243,7 +258,11 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: ./circleci
+          at: .
+
+      - restore_cache:
+          keys: 
+            - frontend-build
       - run:
           name: Install Python
           command: |
@@ -257,16 +276,17 @@ jobs:
       - run:
           name: Install Node
           command: |
-            yum install node npm
+            yum install -y nodejs npm
 
       - run:
           name: Get backend url
           command: |
-            # export BACKEND_IP=$(aws ec2 describe-instances...............)
+            cd frontend
+            BACKEND_IP=$(curl --insecure https://kvdb.io/8xrU98Bae8gHY6aafj3KfW/migration_${CIRCLE_WORKFLOW_ID:0:7})
             export API_URL="http://${BACKEND_IP}:3030"
             echo "API_URL = ${API_URL}"
-            echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
-            cat frontend/.env
+            echo API_URL="http://${BACKEND_IP}:3030" >> .env
+            cat .env
             export API_URL="http://${BACKEND_IP}:3030"
             echo "${API_URL}"
       - run:
@@ -290,25 +310,39 @@ jobs:
           fingerprint: ["95:42:db:09:f9:c4:7f:eb:77:9f:f8:4a:86:7c:2f:35"]
       # attach workspace
       - attach_workspace:
-          at: .circleci/ansible
+          at: .
+      
+      - restore_cache:
+          keys: 
+            - backend-build
+
       - run:
           name: Install dependencies
           command: |
             apk install tar gzip node npm ansible
             python -m pip install awscli
+
+      # - run:
+      #     name: Build Backend
+      #     command: |
+      #       cd backend
+      #       npm i
+      #       npm run build
+
       - run:
-          name: Deploy backend
-          command: |
-            cd backend
-            npm i
-            npm run build
-            cd ..
-            # Zip the directory
-            tar -C backend -czvf artifact.tar.gz .
-            cd .circleci/ansible
-            echo "Contents  of the inventory.txt file is -------"
-            cat inventory.txt
-            ansible-playbook -i inventory.txt deploy-backend.yml
+          name: Zip the directory
+            command: |
+              cd ..
+              tar -C backend -czvf artifact.tar.gz .
+              cd .circleci/ansible
+              echo "Contents  of the inventory.txt file is -------"
+              cat inventory.txt
+
+      - run:
+          name: Deploy Backend
+            command: |
+              cat inventory.txt
+              ansible-playbook -i inventory.txt deploy-backend.yml
       # Here's where you will add some code to rollback on failure
       - destroy-environment
       - revert-migrations
@@ -325,7 +359,7 @@ jobs:
       - run:
           name: Get backend url
           command: |
-            # export BACKEND_IP=$(aws ec2 describe-instances...............)
+            # export BACKEND_IP=$(curl --insecure https://kvdb.io/8xrU98Bae8gHY6aafj3KfW/migration_${CIRCLE_WORKFLOW_ID:0:7})
             export API_URL="http://${BACKEND_IP}:3030"
             echo "API_URL = ${API_URL}"
             echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
@@ -367,7 +401,16 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            yum install node npm
+            yum install -y nodejs npm
+      - run:
+          name: Store old Workflow ID in kvdb
+          command: |
+            cd .circleci/files
+            WorkflowID=$(aws cloudformation \
+              list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
+              --no-paginate --output text)
+            curl https://kvdb.io/8xrU98Bae8gHY6aafj3KfW/oldWorkflowID -d $WorkflowID
+
       - run:
           name: Update cloudfront distribution
           command: |
@@ -388,12 +431,10 @@ jobs:
       - run:
           name: Get old stack workflow id
           command: |
-            export OldWorkflowID=$(aws cloudformation \
-            list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
-            --no-paginate --output text)
+            OldWorkflowID=$(curl --insecure https://kvdb.io/8xrU98Bae8gHY6aafj3KfW/oldWorkflowID)
             echo OldWorkflowID: "${OldWorkflowID}"
             echo CIRCLE_WORKFLOW_ID "${CIRCLE_WORKFLOW_ID:0:7}"
-            # Fetch the stack names
+
             export STACKS=($(aws cloudformation list-stacks --query "StackSummaries[*].StackName" \
             --stack-status-filter CREATE_COMPLETE --no-paginate --output text))
             echo Stack names: "${STACKS[@]}"
@@ -416,58 +457,29 @@ workflows:
       - build-backend
       - test-frontend:
           requires: [build-frontend]
-          filters:
-            branches:
-              only: [master]
       - test-backend:
           requires: [build-backend]
-          filters:
-            branches:
-              only: [master]
       - scan-backend:
           requires: [build-backend]
-          filters:
-            branches:
-              only: [master]
       - scan-frontend:
           requires: [build-frontend]
-          filters:
-            branches:
-              only: [master]
       - deploy-infrastructure:
           requires: [test-frontend, test-backend, scan-frontend, scan-backend]
           filters:
             branches:
               only: [master]
       - configure-infrastructure:
-          filters:
-            branches:
-              only: [master]
           requires: [deploy-infrastructure]
       - run-migrations:
-          filters:
-            branches:
-              only: [master]
           requires: [configure-infrastructure]
       - deploy-frontend:
           requires: [run-migrations]
-          filters:
-            branches:
-              only: [master]
       - deploy-backend:
-          filters:
-            branches:
-              only: [master]
           requires: [run-migrations]
       - smoke-test:
           filters:
-            branches:
-              only: [master]
           requires: [deploy-backend, deploy-frontend]
       - cloudfront-update:
-          filters:
-            branches:
-              only: [master]
           requires: [smoke-test]
       - cleanup:
           filters:
