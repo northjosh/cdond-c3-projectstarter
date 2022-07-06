@@ -186,7 +186,7 @@ jobs:
           fingerprint: ["95:42:db:09:f9:c4:7f:eb:77:9f:f8:4a:86:7c:2f:35"]
       # attach workspace
       - attach_workspace:
-          at: .circle/ansible
+          at: .circleci/ansible
 
       - run:
           name: Install dependencies
@@ -210,7 +210,9 @@ jobs:
       - checkout
       - run:
           name: Install Dependencies
-          command: yum install node npm
+          command: |
+            yum install nodejs curl
+
       - run:
           name: Run migrations
           command: |
