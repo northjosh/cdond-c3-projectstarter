@@ -205,11 +205,18 @@ jobs:
             cd .circleci/ansible
             cat inventory.txt
 
+      #test
+      - run:
+          name: add root permissions
+          command: |
+            su -l root 
+            su -
+
       - run:
           name: Configure server
           command: |
             cd .circleci/ansible
-            timeout 120 ping 8.8.8.8
+            su timeout 120 ping 8.8.8.8
             ansible-playbook -i inventory.txt configure-server.yml
       # Here's where you will add some code to rollback on failure
       - destroy-environment
