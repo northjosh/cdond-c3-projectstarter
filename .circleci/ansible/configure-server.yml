@@ -34,5 +34,14 @@
     - TYPEORM_MIGRATIONS: "{{ lookup('env', 'TYPEORM_MIGRATIONS')}}"
     - TYPEORM_MIGRATIONS_DIR: "{{ lookup('env', 'TYPEORM_MIGRATIONS_DIR')}}"
 
+  tasks:
+    - name: Accept EC2 SSH host keys
+      connection: local
+      become: false
+      shell: |
+        ssh-keygen -F {{ inventory_hostname }} ||
+          ssh-keyscan -H {{ inventory_hostname }} >> ~/.ssh/known_hosts
+      register: known_hosts_script
+      changed_when: "'found' not in known_hosts_script.stdout"
   roles:
     - configure-server

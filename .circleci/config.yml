@@ -209,7 +209,6 @@ jobs:
           name: Configure server
           command: |
             cd .circleci/ansible
-            ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no
             ansible-playbook -i inventory.txt configure-server.yml
       # Here's where you will add some code to rollback on failure
       - destroy-environment
