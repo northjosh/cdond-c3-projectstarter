@@ -196,10 +196,10 @@ jobs:
             python -m pip install awscli
 
       - run:
-        name: View Inventory File
-        command: |
-          cd ~project/.circleci/ansible
-          cat inventry.txt
+          name: View Inventory File
+          command: |
+            cd ~/project/.circleci/ansible
+            cat inventry.txt
 
       - run:
           name: Configure server
