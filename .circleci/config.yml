@@ -30,7 +30,6 @@ commands:
           when: on_fail
           command: |
             # Curl command here to see if there was a successful migration associated with the workflow id, store result in SUCCESS variable
-            SUCCESS = 1d
             SUCCESS=$(curl --insecure  https://kvdb.io/8xrU98Bae8gHY6aafj3KfW/migration_<< parameters.workflow_id >>)
             if(( $SUCCESS==1 )); 
             then
@@ -186,7 +185,7 @@ jobs:
           fingerprint: ["95:42:db:09:f9:c4:7f:eb:77:9f:f8:4a:86:7c:2f:35"]
       # attach workspace
       - attach_workspace:
-          at: ~/project/.circleci/ansible/
+          at: ~/*
 
       - run:
           name: Install dependencies
@@ -217,6 +216,7 @@ jobs:
       - run:
           name: Install Dependencies
           command: |
+            sudo apt-get update
             sudo apt install nodejs npm
             sudo apt install awscli
 
