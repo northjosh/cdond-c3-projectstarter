@@ -207,7 +207,7 @@ jobs:
     docker:
       - image: amazon/aws-cli
     steps:
-      - checkout-
+      - checkout
       - run:
           name: Install Dependencies
           command: yum install node npm
