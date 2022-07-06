@@ -31,8 +31,7 @@ commands:
           command: |
             cd ~/project/backend
             npm install
-            npm run migratios:revert 
-
+            npm run migratios:revert
 
 jobs:
   build-frontend:
@@ -257,7 +256,7 @@ jobs:
           at: .
 
       - restore_cache:
-          keys: 
+          keys:
             - frontend-build
       - run:
           name: Install Python
@@ -307,9 +306,9 @@ jobs:
       # attach workspace
       - attach_workspace:
           at: .
-      
+
       - restore_cache:
-          keys: 
+          keys:
             - backend-build
 
       - run:
@@ -327,18 +326,18 @@ jobs:
 
       - run:
           name: Zip the directory
-            command: |
-              cd ..
-              tar -C backend -czvf artifact.tar.gz .
-              cd .circleci/ansible
-              echo "Contents  of the inventory.txt file is -------"
-              cat inventory.txt
+          command: |
+            cd ..
+            tar -C backend -czvf artifact.tar.gz .
+            cd .circleci/ansible
+            echo "Contents  of the inventory.txt file is -------"
+            cat inventory.txt
 
       - run:
           name: Deploy Backend
-            command: |
-              cat inventory.txt
-              ansible-playbook -i inventory.txt deploy-backend.yml
+          command: |
+            cat inventory.txt
+            ansible-playbook -i inventory.txt deploy-backend.yml
       # Here's where you will add some code to rollback on failure
       - destroy-environment
       - revert-migrations
