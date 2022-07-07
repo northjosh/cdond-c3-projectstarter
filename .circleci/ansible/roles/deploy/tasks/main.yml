@@ -15,7 +15,7 @@
     state: directory
 
 - name: Extract the zipped artifact
-  shell: tar xzvf artifact.tar.gz --directory backend_app
+  shell: tar xzvf artifact.tar.gz --directory backend
 
 - name: Install dependencies
   args:
