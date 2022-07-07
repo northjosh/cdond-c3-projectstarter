@@ -57,11 +57,11 @@
   become: yes
   shell: tar -xvf ~/artifact.tar.gz --directory backend
 
-- name: Install Dependencies
-  become: yes
-  args:
-    chdir: /home/ubuntu/backend
-  shell: npm install
+# - name: Install Dependencies
+#   become: yes
+#   args:
+#     chdir: /home/ubuntu/backend
+#   shell: npm install
 
 - name: "Terminate running tasks"
   become: true
@@ -73,4 +73,6 @@
   shell: |
     npm install
     pm2 stop default
-    pm2 start npm -- start
+    pm2 start npm -- start ./main.js
+  args:
+    chdir: /home/ubuntu/backend/dist
