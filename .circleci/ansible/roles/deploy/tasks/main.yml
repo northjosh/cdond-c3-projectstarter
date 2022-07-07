@@ -12,6 +12,12 @@
   apt:
     upgrade: yes
 
+- name: install the latest version of rsync
+  become: yes
+  apt:
+    name: rsync
+    state: latest
+
 - name: "copy archive"
   become: true
   synchronize:
