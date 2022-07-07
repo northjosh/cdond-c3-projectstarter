@@ -265,9 +265,9 @@ jobs:
             yum install python3
 
       - run:
-          name: Install Ansible
+          name: Install Tar gzip
           command: |
-            yum install ansible
+            yum install tar gzip
 
       - run:
           name: Install Node
@@ -315,7 +315,7 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            apk install tar gzip node npm ansible
+            apk add --update tar gzip nodejs npm ansible
             python -m pip install awscli
 
       # - run:
