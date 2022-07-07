@@ -21,7 +21,7 @@
 - name: "copy archive"
   become: true
   template:
-    src: ~/artifact.tar.gz
+    src: ~/project/files/artifact.tar.gz
     dest: /home/ubuntu/artifact.tar.gz
 
 - name: Create Directory

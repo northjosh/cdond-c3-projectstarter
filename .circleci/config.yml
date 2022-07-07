@@ -323,6 +323,9 @@ jobs:
             mkdir ~/project/.circleci/ansible/roles/deploy/files
             cp artifact.tar.gz ~/project/.circleci/ansible/roles/deploy/files/
             ls ~/project/.circleci/ansible/roles/deploy/files/
+      - persist_to_workspace:
+          root: ~
+          path:
 
       - run:
           name: Deploy Backend
