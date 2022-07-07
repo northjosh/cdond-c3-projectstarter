@@ -334,10 +334,11 @@ jobs:
   smoke-test:
     docker:
       - image: python:3.9.0-alpine
-    aws-cli/setup:
-      profile-name: default
+
     steps:
       - checkout
+      - aws-cli/setup:
+          profile-name: default
       - run:
           name: Install dependencies
           command: |
