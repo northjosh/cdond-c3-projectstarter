@@ -11,7 +11,7 @@
 
 - name: Creates directory
   file:
-    path: ~/backend_app
+    path: ~/backend
     state: directory
 
 - name: Extract the zipped artifact
@@ -19,7 +19,7 @@
 
 - name: Install dependencies
   args:
-    chdir: /home/ubuntu/backend_app
+    chdir: /home/ubuntu/backendS
   shell: npm install
 
 - name: "delete anything that might already be running"
@@ -30,5 +30,5 @@
 - name: "start server"
   become: true
   args:
-    chdir: /home/ubuntu/backend_app
+    chdir: /home/ubuntu/backend
   shell: pm2 start npm -- start
