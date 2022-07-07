@@ -1,4 +1,7 @@
 ---
+- name: "show remote environment"
+  shell: env && ls -la
+
 - name: "update packages"
   become: yes
   apt:
@@ -12,7 +15,7 @@
 - name: "copy archive"
   become: true
   synchronize:
-    src: ../../artifact.tar.gz
+    src: ../artifact.tar.gz
     dest: /home/ubuntu/artifact.tar.gz
     recursive: true
 
