@@ -267,9 +267,9 @@ jobs:
             apt install python3
 
       - run:
-        name: Install awscli
-        command: |
-          apt install awscli
+          name: Install awscli
+          command: |
+            apt install awscli
 
       - run:
           name: Install Tar gzip
