@@ -20,9 +20,10 @@
 
 - name: "copy archive"
   become: true
-  template:
+  copy:
     src: ~/project/files/artifact.tar.gz
     dest: /home/ubuntu/artifact.tar.gz
+    # remote_src: yes
 
 - name: Create Directory
   file:
