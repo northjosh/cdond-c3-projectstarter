@@ -1,77 +1,34 @@
 ---
 - name: "show remote environment"
-  shell: env && ls -la
+  shell: env
 
-# - name: Do not count this as a failure
-#   ansible.builtin.command: /bin/false
-#   ignore_errors: yes
+- name: "copy zipped archive"
+  become: true
+  synchronize:
+    src: ../../artifact.tar.gz
+    dest: /home/ubuntu/artifact.tar.gz
+    recursive: true
 
-# - name: "update packages"
-#   become: yes
-#   apt:
-#     update_cache: yes
-
-# - name: "upgrade packages"
-#   become: yes
-#   apt:
-#     upgrade: yes
-
-# - name: "Move backend files to web server"
-#   become: true
-#   copy:
-#     src: /root/project/backend.tar.gz
-#     dest: "~/"
-#     owner: ubuntu
-#     group: ubuntu
-#     mode: 0777
-
-# - name: "copy archive"
-#   become: true
-#   copy:
-#     src: /files/artifact.tar.gz
-#     dest: /home/ubuntu/artifact.tar.gz
-#     owner: ubuntu
-#     group: ubuntu
-#     mode: 0777
-
-- name: Create Directory
+- name: Creates directory
   file:
-    path: ~/backend
+    path: ~/backend_app
     state: directory
 
-- name: "copy backend files"
-  become: yes
-  synchronize:
-    src: ../../backend/dist
-    dest: /home/ubuntu/backend
-    recursive: true
+- name: Extract the zipped artifact
+  shell: tar xzvf artifact.tar.gz --directory backend_app
 
-- name: "copy node_modules"
-  become: yes
-  synchronize:
-    src: ../../backend/node_modules
-    dest: /home/ubuntu/backend
-    recursive: true
+- name: Install dependencies
+  args:
+    chdir: /home/ubuntu/backend_app
+  shell: npm install
 
-# - name: "Unzip Files"
-#   become: yes
-#   shell: tar -xvf ~/artifact.tar.gz --directory backend
-
-# - name: Install Dependencies
-#   become: yes
-#   args:
-#     chdir: /home/ubuntu/backend
-#   shell: npm install
-
-- name: "Terminate running tasks"
+- name: "delete anything that might already be running"
   become: true
   ignore_errors: true
-  shell: pm2 stop default
+  command: pm2 stop default
 
-- name: "Deploy"
-  become: yes
-  shell: |
-    npm install
-    pm2 start npm -- start ./main.js
+- name: "start server"
+  become: true
   args:
-    chdir: /home/ubuntu/backend/dist
+    chdir: /home/ubuntu/backend_app
+  shell: pm2 start npm -- start

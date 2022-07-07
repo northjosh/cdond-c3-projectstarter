@@ -294,47 +294,37 @@ jobs:
       - image: python:3.9.0-alpine
     steps:
       - checkout
-      - add_ssh_keys:
-          fingerprint: ["95:42:db:09:f9:c4:7f:eb:77:9f:f8:4a:86:7c:2f:35"]
-      # attach workspace
-      - attach_workspace:
-          at: .
-
       - restore_cache:
           keys:
             - backend-build
-
+      - add_ssh_keys:
+          fingerprints:
+            - "5c:b0:d2:b6:07:d4:0a:9a:d0:d9:4e:9d:e0:7b:3f:82"
+      - attach_workspace:
+          at: .
       - run:
           name: Install dependencies
           command: |
-            apk add --update tar gzip nodejs npm ansible openssh
-            python -m pip install awscli
-
+            apk add --update tar gzip ansible curl rsync openssh nodejs npm bash
+            ansible --version
+      - aws-cli/setup:
+          profile-name: default
       - run:
-          name: Build backend
+          name: Zip the backend directory
           command: |
-            cd backend
-            npm i
-            npm run build
-      - run:
-          name: Zip the directory and copy Zipped file
-          command: |
+            pwd &&
+            ls -la
             tar -C backend -czvf artifact.tar.gz .
-            mkdir ~/project/.circleci/ansible/roles/deploy/files
-            cp artifact.tar.gz ~/project/.circleci/ansible/roles/deploy/files/
-            ls ~/project/.circleci/ansible/roles/deploy/files/
-
       - run:
-          name: Deploy Backend
+          name: Deploy backend
+          working_directory: ./.circleci/ansible
           command: |
-            ls ~/project/.circleci/ansible/roles/deploy/files/
-            cd .circleci/ansible
-            echo "Contents  of the inventory.txt file is -------"
             cat inventory.txt
             ansible-playbook -i inventory.txt deploy-backend.yml -v
-      # Here's where you will add some code to rollback on failure
-      - destroy-environment
-      - revert-migrations
+      - destroy_environment:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+      - revert_migrations:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
   smoke-test:
     docker:
