@@ -9,17 +9,17 @@
     dest: /home/ubuntu/artifact.tar.gz
     recursive: true
 
-- name: Creates directory
+- name: Create App directory
   file:
-    path: ~/backend
+    path: ~/app
     state: directory
 
 - name: Extract the zipped artifact
-  shell: tar xzvf artifact.tar.gz --directory backend
+  shell: tar xzvf artifact.tar.gz --directory app
 
 - name: Install dependencies
   args:
-    chdir: /home/ubuntu/backendS
+    chdir: /home/ubuntu/app
   shell: npm install
 
 - name: "delete anything that might already be running"
@@ -30,5 +30,5 @@
 - name: "start server"
   become: true
   args:
-    chdir: /home/ubuntu/backend
+    chdir: /home/ubuntu/app
   shell: pm2 start npm -- start
