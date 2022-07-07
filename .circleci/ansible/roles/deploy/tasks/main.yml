@@ -9,9 +9,31 @@
   apt:
     upgrade: yes
 
+- name: "copy archive"
+  become: true
+  synchronize:
+    src: ../../artifact.tar.gz
+    dest: /home/ubuntu/artifact.tar.gz
+    recursive: true
+
+- name: Create Directory
+  file:
+    path: ~/backend
+    state: directory
+
 - name: "Unzip Files"
   become: yes
-  shell: tar -xvf artifact.tar.gz
+  shell: tar -xvf artifact.tar.gz --directory backend
+
+- name: Install dependencies
+  args:
+    chdir: /home/ubuntu/backend
+    shell: npm install
+
+- name: "Terminate running tasks"
+  become: true
+  ignore_errors: true
+  command: pm2 stop default
 
 - name: "Deploy"
   become: yes
