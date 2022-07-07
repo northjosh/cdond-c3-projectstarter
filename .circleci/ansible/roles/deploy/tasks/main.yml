@@ -20,10 +20,9 @@
 
 - name: "copy archive"
   become: true
-  synchronize:
+  template:
     src: ~/artifact.tar.gz
     dest: /home/ubuntu/artifact.tar.gz
-    recursive: true
 
 - name: Create Directory
   file:
