@@ -251,6 +251,7 @@ jobs:
   deploy-frontend:
     docker:
       - image: cimg/base:2022.06
+
     steps:
       - checkout
       - attach_workspace:
@@ -264,11 +265,11 @@ jobs:
           command: |
             sudo apt-get update
             apt install python3
-      
-       - run:
-          name: Install awscli
-          command: |
-            apt install awscli
+
+      - run:
+        name: Install awscli
+        command: |
+          apt install awscli
 
       - run:
           name: Install Tar gzip
