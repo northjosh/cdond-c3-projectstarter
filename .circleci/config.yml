@@ -261,25 +261,10 @@ jobs:
           keys:
             - frontend-build
       - run:
-          name: Install Python
+          name: Install Dependencies
           command: |
             sudo apt-get update
-            sudo apt install python3
-
-      - run:
-          name: Install awscli
-          command: |
-            apt install awscli
-
-      - run:
-          name: Install Tar gzip
-          command: |
-            apt install tar gzip
-
-      - run:
-          name: Install Node
-          command: |
-            apt install -y nodejs npm
+            sudo apt install python3 awscli tar gzip nodejs npm
 
       - run:
           name: Get backend url
