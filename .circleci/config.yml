@@ -159,8 +159,9 @@ jobs:
           name: Save backend IP in kvdb
           command: |
             BACKEND_IP=$(aws ec2 describe-instances \
-              --query 'Reservations[*].Instances[*].PublicIpAddress' \
-              --filters "Name=tag:Name,Values=udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+            \
+               --query 'Reservations[*].Instances[*].PublicIpAddress' \
+              --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
               --output text)
             curl https://kvdb.io/8xrU98Bae8gHY6aafj3KfW/backend_ip_${CIRCLE_WORKFLOW_ID:0:7} -d "${BACKEND_IP}"
 
