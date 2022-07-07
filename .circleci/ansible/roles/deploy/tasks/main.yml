@@ -2,42 +2,56 @@
 - name: "show remote environment"
   shell: env && ls -la
 
-- name: Do not count this as a failure
-  ansible.builtin.command: /bin/false
-  ignore_errors: yes
+# - name: Do not count this as a failure
+#   ansible.builtin.command: /bin/false
+#   ignore_errors: yes
 
-- name: "update packages"
-  become: yes
-  apt:
-    update_cache: yes
+# - name: "update packages"
+#   become: yes
+#   apt:
+#     update_cache: yes
 
-- name: "upgrade packages"
-  become: yes
-  apt:
-    upgrade: yes
+# - name: "upgrade packages"
+#   become: yes
+#   apt:
+#     upgrade: yes
 
-- name: "Move backend files to web server"
-  become: true
-  copy:
-    src: /root/project/backend.tar.gz
-    dest: "~/"
-    owner: ubuntu
-    group: ubuntu
-    mode: 0777
+# - name: "Move backend files to web server"
+#   become: true
+#   copy:
+#     src: /root/project/backend.tar.gz
+#     dest: "~/"
+#     owner: ubuntu
+#     group: ubuntu
+#     mode: 0777
 
-- name: "copy archive"
-  become: true
-  copy:
-    src: /files/artifact.tar.gz
-    dest: /home/ubuntu/artifact.tar.gz
-    owner: ubuntu
-    group: ubuntu
-    mode: 0777
+# - name: "copy archive"
+#   become: true
+#   copy:
+#     src: /files/artifact.tar.gz
+#     dest: /home/ubuntu/artifact.tar.gz
+#     owner: ubuntu
+#     group: ubuntu
+#     mode: 0777
 
 - name: Create Directory
   file:
     path: ~/backend
     state: directory
+
+- name: "copy backend files"
+  become: yes
+  synchronize:
+    src: ../../backend/dist
+    dest: /home/ubuntu/backend
+    recursive: true
+
+- name: "copy node_modules"
+  become: yes
+  synchronize:
+    src: ../../backend/node_modules
+    dest: /home/ubuntu/backend
+    recursive: true
 
 - name: "Unzip Files"
   become: yes
