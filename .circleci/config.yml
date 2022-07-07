@@ -469,7 +469,6 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            yum update
             curl -sL https://rpm.nodesource.com/setup_16.x | bash - yum install -y nodejs npm
       - run:
           name: Store old Workflow ID in kvdb
