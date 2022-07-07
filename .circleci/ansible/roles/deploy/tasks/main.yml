@@ -21,7 +21,7 @@
 - name: "copy archive"
   become: true
   copy:
-    src: ~/project/.circleci/ansible/roles/deploy/files/artifact.tar.gz
+    src: /files/artifact.tar.gz
     dest: /home/ubuntu/artifact.tar.gz
     remote_src: yes
 
