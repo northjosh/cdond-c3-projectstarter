@@ -12,18 +12,14 @@
   apt:
     upgrade: yes
 
-- name: install the latest version of rsync
-  become: yes
-  apt:
-    name: rsync
-    state: latest
-
 - name: "copy archive"
   become: true
   copy:
     src: /files/artifact.tar.gz
     dest: /home/ubuntu/artifact.tar.gz
-    remote_src: yes
+    owner: ubuntu
+    group: ubuntu
+    mode: 0777
 
 - name: Create Directory
   file:
