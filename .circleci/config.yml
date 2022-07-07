@@ -35,7 +35,6 @@ commands:
           when: on_fail
           command: |
             cd ~/project/backend
-            npm install
             npm run migrations:revert
 
 jobs:
@@ -276,8 +275,7 @@ jobs:
           command: |
             cd frontend
             BACKEND_IP=$(curl --insecure https://kvdb.io/8xrU98Bae8gHY6aafj3KfW/backend_ip_${CIRCLE_WORKFLOW_ID:0:7})
-            export API_URL="http://${BACKEND_IP}:3030"
-            echo "API_URL = ${API_URL}"
+            API_URL="http://${BACKEND_IP}:3030"
             echo API_URL="http://${BACKEND_IP}:3030" >> .env
             cat .env
             export API_URL="http://${BACKEND_IP}:3030"
