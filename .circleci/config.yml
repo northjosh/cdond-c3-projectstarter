@@ -227,7 +227,7 @@ jobs:
           name: Install Dependencies
           command: |
             sudo apt-get update
-            sudo apt install awscli
+            sudo apt install awscli 
             sudo apt install nodejs npm
 
       - run:
@@ -264,7 +264,7 @@ jobs:
           name: Install Python
           command: |
             sudo apt-get update
-            apt install python3
+            sudo apt install python3
 
       - run:
           name: Install awscli
@@ -322,7 +322,7 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            apk add --update tar gzip nodejs npm ansible
+            apk add --update tar gzip nodejs npm ansible openssh
             python -m pip install awscli
 
       # - run:
