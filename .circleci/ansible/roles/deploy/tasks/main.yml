@@ -29,7 +29,7 @@
   become: yes
   args:
     chdir: /home/ubuntu/backend
-    shell: npm install
+  shell: npm install
 
 - name: "Terminate running tasks"
   become: true
