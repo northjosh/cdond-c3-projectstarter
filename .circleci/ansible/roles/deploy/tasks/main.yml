@@ -25,7 +25,8 @@
   become: yes
   shell: tar -xvf artifact.tar.gz --directory backend
 
-- name: Install dependencies
+- name: Install Dependencies
+  become: yes
   args:
     chdir: /home/ubuntu/backend
     shell: npm install
@@ -33,7 +34,7 @@
 - name: "Terminate running tasks"
   become: true
   ignore_errors: true
-  command: pm2 stop default
+  shell: pm2 stop default
 
 - name: "Deploy"
   become: yes
