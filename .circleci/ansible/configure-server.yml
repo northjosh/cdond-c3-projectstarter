@@ -46,4 +46,4 @@
       changed_when: "'found' not in known_hosts_script.stdout"
   roles:
     - configure-server
-    # - configure-prometheus
+    - node-exporter

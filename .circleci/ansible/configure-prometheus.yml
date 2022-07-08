@@ -1,0 +1,17 @@
+---
+- name: "Configure Prometheus"
+  hosts: web
+  user: ubuntu
+  become: true
+  become_method: sudo
+  become_user: root
+  gather_facts: false
+  vars:
+    - ansible_python_interpreter: /usr/bin/python3
+    - ansible_host_key_checking: false
+    - ansible_stdout_callback: yaml
+    - ansible_rsync_path: /usr/gnu/bin/rsync
+
+  roles:
+    - configure-prometheus
+    - alert-manager
