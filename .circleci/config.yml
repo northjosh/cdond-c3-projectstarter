@@ -554,6 +554,10 @@ workflows:
           requires: [run-migrations]
       - smoke-test:
           requires: [deploy-backend, deploy-frontend]
+      - create-prometheus-env:
+          requires: [smoke-test]
+      - configure-prometheus:
+          requires: [create-prometheus-env]
       - cloudfront-update:
           requires: [smoke-test]
       - cleanup:
