@@ -413,7 +413,7 @@ jobs:
             echo \
             "rule_files:
               - /etc/prometheus/rules.yml
-+
+
             global:
               scrape_interval: 1s
               evaluation_interval: 1s
