@@ -446,33 +446,33 @@ jobs:
       - destroy-environment:
           workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
 
-  configure-prometheus:
-    docker:
-      - image: python:3.9.0-alpine
-    steps:
-      - checkout
-      - run:
-          name: Install tar utility
-          command: apk add --no-cache tar gzip
-      - aws-cli/setup:
-          profile-name: default
-      - attach_workspace:
-          at: .
-      - add_ssh_keys:
-          fingerprints: ["7d:bf:92:9a:e1:27:9d:32:c3:24:62:2c:61:a5:7e:ff"]
-      - run:
-          name: Install Ansible
-          command: |
-            apk add --update ansible openssh
+  # configure-prometheus:
+  #   docker:
+  #     - image: python:3.9.0-alpine
+  #   steps:
+  #     - checkout
+  #     - run:
+  #         name: Install tar utility
+  #         command: apk add --no-cache tar gzip
+  #     - aws-cli/setup:
+  #         profile-name: default
+  #     - attach_workspace:
+  #         at: .
+  #     - add_ssh_keys:
+  #         fingerprints: ["7d:bf:92:9a:e1:27:9d:32:c3:24:62:2c:61:a5:7e:ff"]
+  #     - run:
+  #         name: Install Ansible
+  #         command: |
+  #           apk add --update ansible openssh
 
-      - run:
-          name: Configure prometheus server
-          working_directory: ./.circleci/ansible
-          command: |
-            cat prom-inventory.txt
-            ansible-playbook -i prom-inventory.txt configure-prometheus.yml
-      - destroy-environment
-      - revert-migrations
+  #     - run:
+  #         name: Configure prometheus server
+  #         working_directory: ./.circleci/ansible
+  #         command: |
+  #           cat prom-inventory.txt
+  #           ansible-playbook -i prom-inventory.txt configure-prometheus.yml
+  #     - destroy-environment
+  #     - revert-migrations
 
   cloudfront-update:
     docker:
@@ -562,8 +562,8 @@ workflows:
           requires: [deploy-backend, deploy-frontend]
       - create-prometheus-env:
           requires: [smoke-test]
-      - configure-prometheus:
-          requires: [create-prometheus-env]
+      # - configure-prometheus:
+      #     requires: [create-prometheus-env]
       - cloudfront-update:
           requires: [smoke-test]
       - cleanup:
