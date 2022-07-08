@@ -12,6 +12,11 @@
     - ansible_stdout_callback: yaml
     - ansible_rsync_path: /usr/gnu/bin/rsync
 
+  pre_tasks:
+    - name: "wait 30 seconds for target connection to become reachable/usable."
+      wait_for_connection:
+        timeout: 30
+
   tasks:
     - name: Accept EC2 SSH host keys
       connection: local
