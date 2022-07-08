@@ -393,7 +393,7 @@ jobs:
           command: |
             aws cloudformation deploy \
               --template-file .circleci/files/prometheus.yml \
-              --stack-name udapeople-prometheus \
+              --stack-name udapeople-prometheus-${CIRCLE_WORKFLOW_ID:0:7} \
               --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}" \
               --tags name=prometheus
       - run:
