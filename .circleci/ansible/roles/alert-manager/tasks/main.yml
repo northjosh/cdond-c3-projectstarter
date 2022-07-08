@@ -16,7 +16,7 @@
 - name: configure alert manager to send alerts
   become: yes
   template:
-    src: files/alert_manager.yml
+    src: files/alertmanager.yml
     dest: /etc/prometheus/alertmanager.yml.
 
 - name: alert manager rules
@@ -28,7 +28,7 @@
 - name: start alert manager as a service
   become: yes
   template:
-    src: /files/alert_manager.service
+    src: files/alertmanager.service
     dest: /etc/systemd/system/alertmanager.service
 
 - name: configure systemd

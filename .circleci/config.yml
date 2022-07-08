@@ -396,18 +396,21 @@ jobs:
               --stack-name udapeople-prometheus-${CIRCLE_WORKFLOW_ID:0:7} \
               --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}" \
               --tags name=prometheus
-      - run:
-          name: Save prometheus server IP in kvdb
-          command: |
-            PROMETHEUS_IP=$(aws ec2 describe-instances \
-              --query 'Reservations[*].Instances[*].PublicIpAddress' \
-              --filters "Name=tag:name,Values=prometheus" \
-              --output text)
-            curl https://kvdb.io/8xrU98Bae8gHY6aafj3KfW/prometheus_${CIRCLE_WORKFLOW_ID:0:7} -d ${PROMETHEUS_IP}
+      # - run:
+      #     name: Save prometheus server IP in kvdb
+      #     command: |
+      #       PROMETHEUS_IP=$(aws ec2 describe-instances \
+      #         --query 'Reservations[*].Instances[*].PublicIpAddress' \
+      #         --filters "Name=tag:name,Values=prometheus" \
+      #         --output text)
+      #       curl https://kvdb.io/8xrU98Bae8gHY6aafj3KfW/prometheus_${CIRCLE_WORKFLOW_ID:0:7} -d ${PROMETHEUS_IP}
       - run:
           name: Add prometheus server IP to ansible inventory
           command: |
-            curl --insecure https://kvdb.io/8xrU98Bae8gHY6aafj3KfW/prometheus_${CIRCLE_WORKFLOW_ID:0:7} >> .circleci/ansible/prom-inventory.txt
+            aws ec2 describe-instances \
+              --query 'Reservations[*].Instances[*].PublicIpAddress' \
+              --filters "Name=tag:name,Values=prometheus-" \
+              --output text >> .circleci/ansible/prom-inventory.txt
       - run:
           name: prepare prometheus configuration
           command: |
@@ -433,7 +436,7 @@ jobs:
                     secret_key: ${AWS_READONLY_KEY}
                     port: 9100
 
-              - job_name: "node_exporter""> .circleci/ansible/roles/configure-prometheus/files/prometheus.yml
+              - job_name: "node_exporter"" > .circleci/ansible/roles/configure-prometheus/files/prometheus.yml
 
       - persist_to_workspace:
           root: .

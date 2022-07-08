@@ -1,4 +1,4 @@
-route:
+
 [Unit]
 Description=Alert Manager
 Wants=network-online.target
