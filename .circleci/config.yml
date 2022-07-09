@@ -380,22 +380,22 @@ jobs:
       - destroy-environment
       - revert-migrations
 
-      create-prometheus-env:
-        docker:
-          - image: amazon/aws-cli
-        steps:
-          - checkout
-          - run:
-              name: Install tar and gzip
-              command: yum install -y tar gzip curl
-          - run:
-              name: Create prometheus infrastructure
-              command: |
-                aws cloudformation deploy \
-                  --template-file .circleci/files/prometheus.yml \
-                  --stack-name udapeople-prometheus-${CIRCLE_WORKFLOW_ID:0:7} \
-                  --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}" \
-                  --tags name=prometheus
+  create-prometheus-env:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run:
+          name: Install tar and gzip
+          command: yum install -y tar gzip curl
+      - run:
+          name: Create prometheus infrastructure
+          command: |
+            aws cloudformation deploy \
+              --template-file .circleci/files/prometheus.yml \
+              --stack-name udapeople-prometheus-${CIRCLE_WORKFLOW_ID:0:7} \
+              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}" \
+              --tags name=prometheus
       - run:
           name: Save prometheus server IP in kvdb
           command: |
