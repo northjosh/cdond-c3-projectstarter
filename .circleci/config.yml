@@ -194,7 +194,7 @@ jobs:
     steps:
       - checkout
       - add_ssh_keys:
-          fingerprint: ["95:42:db:09:f9:c4:7f:eb:77:9f:f8:4a:86:7c:2f:35"]
+          fingerprints: ["95:42:db:09:f9:c4:7f:eb:77:9f:f8:4a:86:7c:2f:35"]
       # attach workspace
       - attach_workspace:
           at: .
@@ -412,8 +412,9 @@ jobs:
               --filters "Name=tag:Name,Values=prometheus-${CIRCLE_WORKFLOW_ID:0:7}" \
               --output text >> .circleci/ansible/prom-inventory.txt
       - run:
-          name: prepare prometheus configuration
+          name: add targets to config.yml
           command: |
+
             TARGET=$(aws ec2 describe-instances \
             --query 'Reservations[*].Instances[*].PublicDnsName' \
             --filters "Name=tag:Name,Values=prometheus-${CIRCLE_WORKFLOW_ID:0:7}" \
@@ -421,13 +422,11 @@ jobs:
             echo -e "\n    static_configs: \n      - targets: [\""${TARGET}"\"]" >> .circleci/ansible/roles/configure-prometheus/files/prometheus.yml
 
       - persist_to_workspace:
-      - persist_to_workspace:
           root: .
           paths:
             - .circleci/ansible/prom-inventory.txt
             - .circleci/ansible/roles/configure-prometheus/files/prometheus.yml
       - destroy-environment:
-          workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
 
   configure-prometheus:
     docker:
