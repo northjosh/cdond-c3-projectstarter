@@ -27,6 +27,7 @@ plugins/ios.json
 $RECYCLE.BIN/
 postgres_dev/
 logfile
+ubuntu@ec2-18-212-172-94.compute-1.amazonaws.com/
 
 .DS_Store
 Thumbs.db
@@ -69,3 +70,4 @@ node_modules
 .env
 dist
 ansible2.pem
+# udacity.pem

@@ -1,39 +1,10 @@
-- name: "install node exporter."
-  unarchive:
-    src: https://github.com/prometheus/node_exporter/releases/download/v0.17.0/node_exporter-0.17.0.linux-amd64.tar.gz
-    dest: /tmp
-    remote_src: yes
-
-- name: "move binary to /usr/local/bin."
-  become: true
-  copy:
-    src: /tmp/node_exporter-0.17.0.linux-amd64/node_exporter
-    dest: /usr/local/bin/node_exporter
-    remote_src: yes
-    mode: "0777"
-
-- name: "add node exporter configuration."
-  become: true
-  copy:
-    src: node_exporter.service
-    dest: /etc/systemd/system/
-
-- name: "enable node_exporter service"
-  become: true
-  systemd:
-    state: restarted
-    daemon_reload: yes
-    name: node_exporter
-    enabled: yes
-
 ##prometheus config
-
 - name: add user to run prometheus service
   become: yes
   user:
     create_home: no
     name: prometheus
-    comment: Prometheus User
+    comment: PrometheusUser
 
 - name: create a directory to host prometheus configuration
   become: yes
@@ -63,11 +34,11 @@
     cp -r prometheus-2.19.0.linux-amd64/console_libraries /etc/prometheus
     cp prometheus-2.19.0.linux-amd64/promtool /usr/local/bin/
 
-- name: cleanup
+- name: delete files
   shell: |
     rm -rf prometheus-2.19.0.linux-amd64.tar.gz prometheus-2.19.0.linux-amd64
 
-- name: configure Prometheus to start receiving metrics from the Node Exporter
+- name: configure Prometheus to receiveg metrics from node exporter
   become: yes
   template:
     src: "files/prometheus.yml"

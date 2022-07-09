@@ -1,5 +1,9 @@
 version: 2.1
 
+orbs:
+  aws-cli: circleci/aws-cli@3.1.1
+  node: circleci/node@5.0.2
+
 commands:
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
@@ -14,8 +18,10 @@ commands:
           when: on_fail
           command: |
             echo "Destroying environment: << parameters.workflow_id >> "
+            aws s3 rm s3://udapeople-<< parameters.workflow_id >> --recursive
             aws cloudformation delete-stack --stack-name udapeople-frontend-<< parameters.workflow_id >>
             aws cloudformation delete-stack --stack-name udapeople-backend-<< parameters.workflow_id >>
+            aws cloudformation delete-stack --stack-name prometheus-<< parameters.workflow_id >>
 
   revert-migrations:
     description: Revert the last migration if successfully run in the current workflow.
@@ -30,7 +36,6 @@ commands:
           when: on_fail
           command: |
             cd ~/project/backend
-            npm install
             npm run migrations:revert
 
 jobs:
@@ -189,7 +194,7 @@ jobs:
     steps:
       - checkout
       - add_ssh_keys:
-          fingerprint: ["95:42:db:09:f9:c4:7f:eb:77:9f:f8:4a:86:7c:2f:35"]
+          fingerprints: ["95:42:db:09:f9:c4:7f:eb:77:9f:f8:4a:86:7c:2f:35"]
       # attach workspace
       - attach_workspace:
           at: .
@@ -271,8 +276,7 @@ jobs:
           command: |
             cd frontend
             BACKEND_IP=$(curl --insecure https://kvdb.io/8xrU98Bae8gHY6aafj3KfW/backend_ip_${CIRCLE_WORKFLOW_ID:0:7})
-            export API_URL="http://${BACKEND_IP}:3030"
-            echo "API_URL = ${API_URL}"
+            API_URL="http://${BACKEND_IP}:3030"
             echo API_URL="http://${BACKEND_IP}:3030" >> .env
             cat .env
             export API_URL="http://${BACKEND_IP}:3030"
@@ -294,62 +298,56 @@ jobs:
       - image: python:3.9.0-alpine
     steps:
       - checkout
-      - add_ssh_keys:
-          fingerprint: ["95:42:db:09:f9:c4:7f:eb:77:9f:f8:4a:86:7c:2f:35"]
-      # attach workspace
-      - attach_workspace:
-          at: .
-
       - restore_cache:
           keys:
             - backend-build
-
+      - add_ssh_keys:
+          fingerprints:
+            - "5c:b0:d2:b6:07:d4:0a:9a:d0:d9:4e:9d:e0:7b:3f:82"
+      - attach_workspace:
+          at: .
       - run:
           name: Install dependencies
           command: |
-            apk add --update tar gzip nodejs npm ansible openssh
-            python -m pip install awscli
-
+            apk add --update tar gzip ansible curl rsync openssh nodejs npm bash
+            ansible --version
+      - aws-cli/setup:
+          profile-name: default
       - run:
-          name: Build backend
+          name: Zip the backend directory
           command: |
-            cd backend
-            npm i
-            npm run build
-      - run:
-          name: Zip the directory and copy Zipped file
-          command: |
+            pwd &&
+            ls -la
             tar -C backend -czvf artifact.tar.gz .
-            mkdir ~/project/.circleci/ansible/roles/deploy/files
-            cp artifact.tar.gz ~/project/.circleci/ansible/roles/deploy/files/
-            ls ~/project/.circleci/ansible/roles/deploy/files/
-
       - run:
-          name: Deploy Backend
+          name: Deploy backend
+          working_directory: ./.circleci/ansible
           command: |
-            ls ~/project/.circleci/ansible/roles/deploy/files/
-            cd .circleci/ansible
-            echo "Contents  of the inventory.txt file is -------"
             cat inventory.txt
             ansible-playbook -i inventory.txt deploy-backend.yml -v
-      # Here's where you will add some code to rollback on failure
-      - destroy-environment
-      - revert-migrations
+      - destroy-environment:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+      - revert-migrations:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
   smoke-test:
     docker:
-      - image: cimg/base:2022.06
+      - image: python:3.9.0-alpine
+
     steps:
       - checkout
+      - aws-cli/setup:
+          profile-name: default
       - run:
           name: Install dependencies
           command: |
-            apt install awscli curl
+            apk add --update nodejs npm curl
+
       - run:
           name: Get backend url
           command: |
-            # export BACKEND_IP=$(curl --insecure https://kvdb.io/8xrU98Bae8gHY6aafj3KfW/backend_ip_${CIRCLE_WORKFLOW_ID:0:7})
-            export API_URL="http://${BACKEND_IP}:3030"
+            BACKEND_IP=$(curl --insecure https://kvdb.io/8xrU98Bae8gHY6aafj3KfW/backend_ip_${CIRCLE_WORKFLOW_ID:0:7})
+            API_URL="http://${BACKEND_IP}:3030"
             echo "API_URL = ${API_URL}"
             echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
             cat frontend/.env
@@ -358,13 +356,14 @@ jobs:
       - run:
           name: Backend smoke test.
           command: |
-            export API_URL="http://${BACKEND_IP}:3030"
+            BACKEND_IP=$(curl --insecure https://kvdb.io/8xrU98Bae8gHY6aafj3KfW/backend_ip_${CIRCLE_WORKFLOW_ID:0:7})
+            API_URL="http://${BACKEND_IP}:3030"
             echo "${API_URL}"
             if curl "${API_URL}/api/status" | grep "ok"
             then
-                return 0
+              return 0
             else
-                return 1
+              return 1
             fi
       - run:
           name: Frontend smoke test.
@@ -373,12 +372,86 @@ jobs:
             echo ${URL}
             if curl -s ${URL} | grep "Welcome"
             then
-                # Change this to 0 after the job fails
-              return 1
+              return 0
             else
               return 1
             fi
       # Here's where you will add some code to rollback on failure
+      - destroy-environment
+      - revert-migrations
+
+  create-prometheus-env:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run:
+          name: Install tar and gzip
+          command: yum install -y tar gzip curl
+      - run:
+          name: Create prometheus infrastructure
+          command: |
+            aws cloudformation deploy \
+              --template-file .circleci/files/prometheus.yml \
+              --stack-name udapeople-prometheus-${CIRCLE_WORKFLOW_ID:0:7} \
+              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}" \
+              --tags name=prometheus
+      - run:
+          name: Save prometheus server IP in kvdb
+          command: |
+            PROMETHEUS_IP=$(aws ec2 describe-instances \
+              --query 'Reservations[*].Instances[*].PublicIpAddress' \
+              --filters "Name=tag:Name,Values=prometheus-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --output text)
+            curl https://kvdb.io/8xrU98Bae8gHY6aafj3KfW/prometheus_${CIRCLE_WORKFLOW_ID:0:7} -d ${PROMETHEUS_IP}
+      - run:
+          name: Add prometheus server IP to ansible inventory
+          command: |
+            aws ec2 describe-instances \
+              --query 'Reservations[*].Instances[*].PublicIpAddress' \
+              --filters "Name=tag:Name,Values=prometheus-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --output text >> .circleci/ansible/prom-inventory.txt
+      - run:
+          name: add targets to config.yml
+          command: |
+            TARGET=$(aws ec2 describe-instances \
+            --query 'Reservations[*].Instances[*].PublicDnsName' \
+            --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+            --output text)
+            echo -e "\n    static_configs: \n      - targets: [\""${TARGET}":9100\"]" >> .circleci/ansible/roles/configure-prometheus/files/prometheus.yml
+
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .circleci/ansible/prom-inventory.txt
+            - .circleci/ansible/roles/configure-prometheus/files/prometheus.yml
+      - destroy-environment
+
+  configure-prometheus:
+    docker:
+      - image: python:3.9.0-alpine
+    steps:
+      - checkout
+      - run:
+          name: Install tar utility
+          command: apk add --no-cache tar gzip
+      - aws-cli/setup:
+          profile-name: default
+      - attach_workspace:
+          at: .
+      - add_ssh_keys:
+          fingerprints: ["7d:bf:92:9a:e1:27:9d:32:c3:24:62:2c:61:a5:7e:ff"]
+      - run:
+          name: Install Ansible
+          command: |
+            apk add --update ansible openssh
+
+      - run:
+          name: Configure prometheus server
+          working_directory: ./.circleci/ansible
+          command: |
+            cat prom-inventory.txt
+            ansible-playbook -i prom-inventory.txt configure-prometheus.yml
       - destroy-environment
       - revert-migrations
 
@@ -390,6 +463,7 @@ jobs:
       - run:
           name: Install dependencies
           command: |
+            curl -sL https://rpm.nodesource.com/setup_16.x | bash -
             yum install -y nodejs npm
       - run:
           name: Store old Workflow ID in kvdb
@@ -467,6 +541,10 @@ workflows:
           requires: [run-migrations]
       - smoke-test:
           requires: [deploy-backend, deploy-frontend]
+      - create-prometheus-env:
+          requires: [smoke-test]
+      - configure-prometheus:
+          requires: [create-prometheus-env]
       - cloudfront-update:
           requires: [smoke-test]
       - cleanup:
