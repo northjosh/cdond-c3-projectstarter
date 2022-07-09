@@ -11,3 +11,9 @@ route:
           auth_username: joshmensah18@gmail.com
           auth_identity: joshmensah18@gmail.com
           auth_password: Josh_ua123
+inhibit_rules:
+  - source_match:
+      severity: "critical"
+    target_match:
+      severity: "warning"
+    equal: ["alertname", "dev", "instance"]
