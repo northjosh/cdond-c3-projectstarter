@@ -418,7 +418,7 @@ jobs:
             --query 'Reservations[*].Instances[*].PublicDnsName' \
             --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
             --output text)
-            echo -e "\n    static_configs: \n      - targets: [\""${TARGET}"\"]" >> .circleci/ansible/roles/configure-prometheus/files/prometheus.yml
+            echo -e "\n    static_configs: \n      - targets: [\""${TARGET}":9100\"]" >> .circleci/ansible/roles/configure-prometheus/files/prometheus.yml
 
       - persist_to_workspace:
           root: .
