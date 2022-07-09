@@ -69,3 +69,4 @@ node_modules
 .env
 dist
 ansible2.pem
+udacity.pem
