@@ -23,7 +23,7 @@
       become: false
       shell: |
         ssh-keygen -F {{ inventory_hostname }} ||
-          ssh-keyscan -H {{ inventory_hostname }} >> ~/.ssh/known_hosts
+        ssh-keyscan -H {{ inventory_hostname }} >> ~/.ssh/known_hosts
       register: known_hosts_script
       changed_when: "'found' not in known_hosts_script.stdout"
 
