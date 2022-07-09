@@ -416,7 +416,7 @@ jobs:
           command: |
             TARGET=$(aws ec2 describe-instances \
             --query 'Reservations[*].Instances[*].PublicDnsName' \
-            --filters "Name=tag:Name,Values=udapeople-${CIRCLE_WORKFLOW_ID:0:7}" \
+            --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
             --output text)
             echo -e "\n    static_configs: \n      - targets: [\""${TARGET}"\"]" >> .circleci/ansible/roles/configure-prometheus/files/prometheus.yml
 
