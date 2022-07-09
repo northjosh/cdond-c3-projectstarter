@@ -30,7 +30,7 @@
   become: true
   copy:
     src: files/alertmanager.service
-    dest: /etc/systemd/system/
+    dest: /etc/systemd/system/alertmanager.service
 
 - name: "enable alertmanager service"
   become: true
