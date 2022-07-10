@@ -10,6 +10,12 @@
     src: "files/alertmanager.yml"
     dest: "/etc/prometheus/alertmanager.yml"
 
+- name: "add alertmanager's configuration."
+  become: true
+  template:
+    src: "files/alertmanager.yml"
+    dest: "/alertmanager-0.24.0.linux-amd64/alertmanager.yml"
+
 - name: "configure Alertmanager as a service."
   become: true
   copy:

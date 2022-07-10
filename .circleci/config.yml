@@ -277,16 +277,14 @@ jobs:
           command: |
             cd frontend
             BACKEND_IP=$(curl --insecure https://kvdb.io/8xrU98Bae8gHY6aafj3KfW/backend_ip_${CIRCLE_WORKFLOW_ID:0:7})
-            API_URL="http://${BACKEND_IP}:3030"
-            echo API_URL="http://${BACKEND_IP}:3030" >> .env
+            export BACKEND_URL="http://${BACKEND_IP}:3030"
+            echo "API_URL=${BACKEND_URL}"
+            echo API_URL="${BACKEND_URL}" >> .env
             cat .env
-            export API_URL="http://${BACKEND_IP}:3030"
-            echo "${API_URL}"
       - run:
           name: Deploy frontend objects
           command: |
             cd frontend
-            npm install
             npm run build
             tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
             aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
@@ -315,7 +313,7 @@ jobs:
       - aws-cli/setup:
           profile-name: default
       - run:
-          name: Zip the backend directory
+          name: Zip the backend
           command: |
             pwd &&
             ls -la

@@ -22,7 +22,7 @@
     chdir: /home/ubuntu/app
   shell: npm install
 
-- name: "delete anything that might already be running"
+- name: "stop already running tasks"
   become: true
   ignore_errors: true
   command: pm2 stop default
