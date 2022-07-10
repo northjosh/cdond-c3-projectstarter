@@ -435,7 +435,7 @@ jobs:
       - checkout
       - run:
           name: Install tar utility
-          command: apk add --no-cache tar gzip
+          command: apk add --no-cache tar gzip nodejs npm
       - aws-cli/setup:
           profile-name: default
       - attach_workspace:
