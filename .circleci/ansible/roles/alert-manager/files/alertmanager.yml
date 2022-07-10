@@ -5,16 +5,21 @@ route:
   repeat_interval: 1h
   receiver: email-me
 
-  receivers:
-    - name: email-me
-      email_configs:
-        - to: bwoyreezy22@gmail.com
-          from: joshmensah18@gmail.com
-          smarthost: smtp.gmail.com:587
-          auth_username: joshmensah18@gmail.com
-          auth_identity: joshmensah18@gmail.com
-          auth_password: Josh_ua123
-          send_resolved: true
+receivers:
+  - name: "web.hook"
+    webhook_configs:
+      - url: "http://127.0.0.1:5001/"
+
+  - name: email-me
+    email_configs:
+      - to: bwoyreezy22@gmail.com
+        from: joshmensah18@gmail.com
+        smarthost: smtp.gmail.com:587
+        auth_username: joshmensah18@gmail.com
+        auth_identity: joshmensah18@gmail.com
+        auth_password: gtorpvkucmcxdklc
+        send_resolved: true
+
 inhibit_rules:
   - source_match:
       severity: "critical"
