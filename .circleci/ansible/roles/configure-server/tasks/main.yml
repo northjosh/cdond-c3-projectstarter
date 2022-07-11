@@ -20,6 +20,17 @@
     name: ["nodejs", "npm"]
     state: latest
 
+- name: "install n"
+  become: yes
+  npm:
+    name: n
+    global: true
+    production: true
+
+- name: "install node 13.8.0"
+  become: yes
+  shell: n 13.8.0
+
 - name: "Install pm2"
   become: true
   npm:
